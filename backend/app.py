@@ -1,10 +1,13 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+
 import sqlite3
 import requests
 
 from helpers import set_url
 
 app = Flask(__name__)
+CORS(app)
 
 
 def create_db():
@@ -47,3 +50,9 @@ def send_to_db():
         msg = "Records added!"
         print(msg)
     return api_response
+
+
+@app.route('/forminput', methods=['POST'])
+def get_form_info():
+    print(request.json)
+    return request.json
