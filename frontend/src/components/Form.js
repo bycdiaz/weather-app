@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function Form(props) {
+function Form() {
   const [formInfo, setFormInfo] = useState({
     cityName: '',
     notes: ''
@@ -8,7 +8,6 @@ function Form(props) {
 
   function handleSubmit(event) {
     event.preventDefault();
-    props.getFormState(formInfo);
 
     return fetch( 'http://localhost:5000/forminput', {
       headers: {
