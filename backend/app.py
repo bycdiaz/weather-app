@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, json, jsonify, request, redirect
 from flask_cors import CORS
 
 import sqlite3
@@ -66,7 +66,45 @@ def save_user_input_to_db(city, notes):
         print(msg)
 
 
-@app.route('/', methods=['GET'])
+def retrieve_db_info(table_1, table_2):
+    conn = None
+    try:
+        conn = sqlite3.connect('database.db')
+    except Exception as e:
+        print(e)
+
+    cur = conn.cursor()
+    cur.execute(
+        f'SELECT * FROM {table_1} INNER JOIN {table_2} ON {table_1}.city = {table_2}.city')
+
+    rows = cur.fetchall()
+    return rows
+
+
+def build_response():
+    joined_info = retrieve_db_info('locationinfo', 'weather')
+    response = []
+
+    for element in joined_info:
+        name, notes, name_2, feels_like, description, icon = element
+        entry = {
+            'name': name,
+            'notes': notes,
+            'feels_like': feels_like,
+            'description': description,
+            'icon': icon
+        }
+        response.append(entry)
+
+    return jsonify(response)
+
+
+@app.route('/dbinfo', methods=['GET'])
+def send_db_info():
+    entries = build_response()
+    return entries
+
+
 @app.route('/forminput', methods=['POST'])
 def get_form_info():
     form_input = request.json
@@ -75,4 +113,4 @@ def get_form_info():
                    for x in ('cityName', 'notes')]
     save_weather_to_db(city)
     save_user_input_to_db(city, notes)
-    return request.json
+    return redirect("/dbinfo", code=301)
